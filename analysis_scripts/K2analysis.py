@@ -1,38 +1,21 @@
-import csv
-import matplotlib.pyplot as plt
+import pandas as pd
 import numpy as np
+import matplotlib.pyplot as plt
 
-mass = []
-t = []
-radius = []
-kepMag = []
-kMag = []
+#change the number in campaign_() to desired campaign for analysis
+df = pd.read_csv('../csv_files/campaign_8/search_result.csv')
 
-lst_to_append = [mass, t, radius, kepMag, kMag]
-csv_strs = ['mass.csv', 'tEff.csv', 'radius.csv', 'kepMag.csv', 'kMag.csv']
+#columns are KepMag, Kmag, Teff, mass, Radius
+KepMag = df['KepMag']
+Kmag = df['Kmag'].dropna()
+Teff = df['Teff'].dropna()
+mass = df['mass'].dropna()
+Radius = df['Radius'].dropna()
 
-i = 0
-#populates all the lists with the correct values
-for filename in csv_strs:
-    with open(filename, 'rb') as m:
-    #using csv reader to put data into arrays
-        reader = csv.reader(m)
+n_bins = 40
 
-        for row in reader:
-        #must turn row with string obj into float
-            str1 = row[0]
-            if filename == 'tEff.csv':
-                val = int(str1)
-                t.append(val)
-            else:
-                val = float(str1)
-                lst_to_append[i].append(val)
-    i += 1
-
-#change array that goes into plt function
-#print max(kMag)
-plt.xlabel('Mass')
-#weights = np.ones_like(kMag)/float(len(kMag))
+#Use matplotlib to create histograms for each column
+plt.xlabel('Radius')
 plt.grid(True)
-plt.hist(mass, bins = 40)
+plt.hist(Radius, range = [0, 15], bins = n_bins)
 plt.show()
