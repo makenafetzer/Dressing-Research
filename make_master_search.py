@@ -13,29 +13,27 @@ def enter_csvs():
     os.chdir("csv_files/")
 
 def merge_results():
-    df = pd.read_csv('1_search.csv')
+    """ join into one big dataframe and then write to master_search """
+    os.system("cat 1_search.csv | sed '2 d' > df.csv")
+    df_all = pd.read_csv('df.csv')
     for file in glob.glob('*_search.csv'):
         if file == 'master_search.csv':
             break
-        elif file == '1_search.csv':
-            cmd = "cat {file} | sed '2 d' > master_search.csv".format(file=file)
-        else:
-            df_to_add = pd.read_csv(file, error_bad_lines=False)
-            cols_to_remove = df.columns.difference(df_to_add.columns)
-            print('diff columns', cols_to_remove)
+        elif file != '1_search.csv':
             print(file)
-            if len(df_to_add.columns) > len(df.columns):
-                df_to_add.drop(columns=cols_to_remove)
-                df_to_add.to_csv(file)
-            elif len(df.columns) > len(df_to_add.columns):
-                df.drop(columns=cols_to_remove)
-                df.to_csv('1_search.csv')
-            cmd = "cat {file} | sed '1,2 d' >> master_search.csv".format(file=file)
-        os.system(cmd)
+            file2 = 'temp.csv'
+            print(file2)
+            cmd = "cat {file} | sed '2 d' > {file2}".format(file=file, file2=file2)
+            os.system(cmd)
+            df_to_add = pd.read_csv(file2, error_bad_lines=False)
+            df_all = pd.concat([df_all, df_to_add], axis=0, sort=False)
+
+    df_all.to_csv('master_search.csv')
 
 enter_csvs()
 for folder in glob.glob('campaign*'):
     print('going into:', folder)
-    os.chdir(folder)
-    merge_results()
-    os.chdir('..')
+    if folder != 'campaign_8':
+        os.chdir(folder)
+        merge_results()
+        os.chdir('..')
